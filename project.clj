@@ -18,5 +18,13 @@
               :builds [{:source-path "src-cljs"
                         :repl-listen-port 9000
                         :compiler {:output-to "static/javascripts/main.js"
-                                    :optimizations :whitespace
-                                    :pretty-print true}}]})
+                                   :optimizations :whitespace
+                                   :pretty-print true}}
+
+                       {:source-path "src-cljs-worker"
+                        :compiler {:output-to "static/javascripts/worker.js"
+                                   :optimizations :whitespace
+                                   :pretty-print true}}
+
+
+                       ]})

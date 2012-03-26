@@ -2,8 +2,8 @@
   (:require-macros
    [tatame.macros :as macros])
   (:require
+   [cljs.reader :as reader]
    [clojure.browser.repl :as repl]
-   [clojure.browser.event :as event]
    [clojure.string :as string]
    [goog.dom :as gdom]
    [goog.object :as gobj]))
@@ -81,26 +81,70 @@
         (swap! timer assoc args t)))))
 
 
-;;config buffered calls
-(def run-tests! (delay-buffered run-tests! 500))
-(def refresh-canvas! (delay-buffered refresh-canvas! 200))
-
 
 (defn save-state! [id]
-  (.setItem js/localStorage id (content (@editors id)))
-  true)
-
+  (.setItem js/localStorage id (content (@editors id))))
 
 (defn load-state! [id]
   (when-let [content (.getItem js/localStorage id)]
     (.setValue (session (@editors id)) content)))
+
+
+
+;;; worker
+(def userid (atom (.getItem js/localStorage "userid")))
+
+(defn emit-event!
+  "Send to worker queue."
+  [id data]
+  (set! (.-editor data) id)
+  (.postMessage worker data))
+
+(defn on-server-message [{event :event :as data}]
+  (.log js/console "on server message" (pr-str data))
+  (cond
+   (= event "login")
+   (do
+     (if-let [userid @userid]
+       (.postMessage worker (pr-str {:command "login" :userid userid}))
+       (swap! userid #(do
+                        (.setItem js/localStorage "userid" (:nick data))
+                        (:nick data)))))))
+
+
+(defn on-client-message [data]
+  (.log js/console "on client message" data))
+
+
+(def worker (new js/Worker "/javascripts/worker.js"))
+(.addEventListener worker "message"
+                   (fn [e]
+                     (let [data (reader/read-string (.-data e))]
+                       (if-let [type (:type data)]
+                         (cond
+                          (= type "server")
+                          (on-server-message (reader/read-string (:data data)))
+                          (= type "client")
+                          (on-client-message (:data data)))
+                         (.log js/console "on generic message" data))))
+                   false)
+
+
+
+
+
+
+
+;;;;;;;;;; init
+(def run-tests! (delay-buffered run-tests! 500))
+(def refresh-canvas! (delay-buffered refresh-canvas! 200))
 
 (defn init! []
   (let [editors {"html-editor" {:mode "ace/mode/html"
                                 "change" (fn [& args] (refresh-canvas!))}
 
                  "js-editor"   {:mode "ace/mode/javascript"
-                                "change" (juxt save-state!)
+                                "change" (juxt emit-event! save-state!)
                                 "changeAnnotation" (fn [id] (run-if-stable! id (juxt refresh-canvas! run-tests!)))}
 
                  "test-editor" {:mode "ace/mode/javascript"
@@ -112,4 +156,4 @@
       (load-state! id))))
 
 
-(set! (.-onload js/window) init!)
+(set! window.onload init!)
