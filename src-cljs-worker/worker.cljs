@@ -3,7 +3,6 @@
 (def socket (new js/WebSocket "ws://localhost:8108/socket"))
 (def events (atom '[]))
 
-
 (defn send-messages!
   "Consume local queue and send to server" []
 
@@ -23,8 +22,9 @@
 
     (cond
      (.-editor data)
-      ;; TODO: local persist (log in case of failures)
-     (swap! events conj ^{"ts" (.-timeStamp e)} (js->clj data))
+     ;; TODO: local persist (log in case of failures)
+     (let [event (assoc (js->clj data) :ts (.-timeStamp e))]
+       (swap! events conj event))
 
 
      ;;;delegates straight to server

@@ -2,100 +2,42 @@
   (:use [ring.util.response :only [redirect]]
         [ring.middleware.file :only [wrap-file]]
         [ring.middleware.file-info :only [wrap-file-info]]
-        [compojure.core :only [defroutes GET]])
-
+        [compojure.core :only [defroutes GET]]
+        [clojure.java.io :only [writer]]
+        [tatame.ws :only [state-add-user! state-rm-user! state-mv-user! valid-nick-change? nick-pipe send-users-list-pipe register-lifecycle-hooks register-new-user users events broadcast-channel]])
   (:require [lamina.core :as lamina]
             [aleph.http :as aleph]
             [compojure.route :as route]))
 
 
-(def broadcast-channel (lamina/permanent-channel))
+(defn queue-event!
+  "Enqueue event to memory queue."
+  [nick data]
+  (when-not (@events nick)
+    (dosync (alter events assoc nick (ref []))))
 
-(def users (ref #{}))
+  (let [events (@events nick)]
+    (dosync
+     (alter events conj data))))
 
-(defn state-add-user!
-  [nick]
-  (dosync (commute users conj nick))
-  nick)
 
-(defn state-rm-user!
-  "Removes user from list of registered users."
-  [nick]
-  (dosync (commute users disj nick)))
+(defn persist-events!
+  "Flush events to a file for each user. Assume just one worker thread."  []
+  (println "Persiting events...")
+  (doseq [user (keys @events)]
+    (let [userevents @(@events user)]
+      (with-open [wrtr (writer (str "data/" user) :append true)]
+        (doseq [event userevents]
+          (.write wrtr (pr-str event))
+          (.write wrtr "\n")))
 
-(defn state-mv-user!
-  "Renames user.
-Has to be executed in tranasation."
-  [from to]
-  (commute users
-           #(-> %
-                (disj from)
-                (conj to))))
+      (dosync (alter (@events user) #(apply vector (drop (count userevents) %)))))))
 
-(defn valid-nick-change?
-  "Checks if nickname change is valid."
-  [new-nick]
-  (not (or (empty? new-nick)
-           (contains? @users new-nick)
-           (.contains new-nick " "))))
 
-(defn nick-pipe
-  "Pipeline executed login command"
-  []
-  (println "Creating nick pipeline")
-  (lamina/pipeline
-   (fn [{ch :channel nick :nick new-nick :body :as m}]
-     (println (str "Executing nick pipeline with: " m))
-     (let [old-nick @nick]
-       (if (valid-nick-change? new-nick)
-         (do ;; allowed to change
-           (println (format "nick '%s' -> '%s'"  old-nick new-nick))
-           (dosync
-            (state-mv-user! old-nick new-nick)
-            (ref-set nick new-nick))
-           (lamina/enqueue broadcast-channel (str "/nick " old-nick " " new-nick)))
 
-         (do ;; nickname already taken, or otherwise invalid
-           (println (format "nick '%s' !> '%s'"  old-nick new-nick))
-           ;;(lamina/enqueue ch (pr-str {:event "login" :nick old-nick}))
-
-           ))))))
-
-(defn state-users-count
-  []
-  (count @users))
-
-(defn create-close-handler
-  "Create WebSocket close handler."
-  [ip nick]
-  (fn []
-    (println (str ip " : Closing " @nick))
-    (state-rm-user! @nick)
-    (lamina/enqueue broadcast-channel (pr-str {:event "left" :nick (str @nick)}))))
-
-(defn create-drained-handler
-  "Create WebSocker backing channel drained halnder."
-  [ip nick]
-  (fn []
-    (println (str ip " : Drained " @nick))))
-
-(defn send-users-list-pipe
-  "Pipeline to send current users list"
-  []
-  (let [users @users]
-    (lamina/pipeline
-     #(when-not (or (lamina/closed? %)
-                    (lamina/drained? %))
-        (println "listing users")
-        (lamina/enqueue % (pr-str {:users users}))))))
 
 (defn receive-handler
-  "Receive message over WebWocket event handler.
-  Arguments:
-  - ip - ip of client
-  - ch - channel to be used
-  - nickname - atom to push nickname once set
-  - msg - message received over channel"
+  "Receive message over WebWocket event handler."
   [ip ch nickname msg]
   (println "receive-handler" ip ch msg)
   (let [{command :command :as data} (read-string msg)]
@@ -103,28 +45,12 @@ Has to be executed in tranasation."
      (= command "login")
      ((nick-pipe) {:channel ch
                    :nick nickname
-                   :body (:userid data)}))))
+                   :body (:userid data)})
+
+     (and (map? data) (data "editor"))
+     (queue-event! @nickname data))))
 
 
-(defn register-lifecycle-hooks
-  "Register lifecycle hooks for channel"
-  [ip nickname ch]
-  ((lamina/pipeline
-    #(create-close-handler ip %)
-    #(lamina/on-closed ch %))
-   nickname)
-  ((lamina/pipeline
-    #(create-drained-handler ip %)
-    #(lamina/on-drained ch %))
-   nickname))
-
-(defn register-new-user
-  "Registers new user"
-  [ip nickname]
-  ((lamina/pipeline
-    #(state-add-user! %)
-    #(lamina/enqueue broadcast-channel (pr-str {:event "joined" :nick (str %)})))
-   @nickname))
 
 
 (defn websocket-handler
@@ -133,7 +59,7 @@ Called when client connects.
 Sets up local atom for nickname (closed over by all event handlers).
 Registers event handlers for new WebSocket connection (ch)."
   [ch {ip :remote-addr}]
-  (let [nickname (ref (gensym "coder_"))
+  (let [nickname (ref (str (gensym "coder_") (int (* 1000 (rand)))))
         connect-pipeline (lamina/pipeline
                           #(register-lifecycle-hooks ip nickname %)
                           #(register-new-user ip nickname))]
@@ -154,10 +80,17 @@ Registers event handlers for new WebSocket connection (ch)."
 
 
 
+
+
+
 (defroutes my-app
   (GET "/" [] (redirect "index.html"))
   (GET "/socket" [] (aleph/wrap-aleph-handler websocket-handler))
-  (route/not-found "What you're looking for is not here, sorry."))
+  (route/not-found "no donut for your"))
+
+
+
+(def flush-thread (atom true))
 
 (defn -main []
   (let [port 8108]
@@ -165,4 +98,7 @@ Registers event handlers for new WebSocket connection (ch)."
                                  (wrap-file "static")
                                  wrap-file-info
                                  aleph/wrap-ring-handler) {:port port :websocket true})
-    (println (str "Server started on port " port))))
+    (println (str "Server started on port " port)))
+
+  ;;flush on background
+  (future (do (while @flush-thread (persist-events!) (Thread/sleep 60000)))))

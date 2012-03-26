@@ -21,6 +21,7 @@
 (defn frame-el [id] (gdom/getElement  (frame-id id)))
 (defn frame-template [id] (str "<iframe id=\"" id  "-frame\" src=\"\"style=\"width:100%; height:100%\"></iframe>"))
 
+
 (defn init-editor!
   "Initializes ACE editor with corresponding mode and bind event listeners."
   [id mode listeners]
@@ -91,7 +92,54 @@
 
 
 
-;;; worker
+
+
+
+;;;;; init ;;;;;
+
+(def run-tests! (delay-buffered run-tests! 500))
+(def refresh-canvas! (delay-buffered refresh-canvas! 200))
+
+(defn init! []
+  (let [onchange (juxt emit-event! save-state!)
+        editors {"html-editor" {:mode "ace/mode/html"
+                                "change" (fn [id event] (refresh-canvas!) (onchange id event))}
+
+                 "js-editor"   {:mode "ace/mode/javascript"
+                                "change" onchange
+                                "changeAnnotation" (fn [id] (run-if-stable! id (juxt refresh-canvas! run-tests!)))}
+
+                 "test-editor" {:mode "ace/mode/javascript"
+                                "change" onchange
+                                "changeAnnotation" (fn [id] (run-if-stable! id run-tests!))}}]
+
+    ;;load from local storage
+    (doseq [[id opts] editors]
+      (init-editor! id (:mode opts) (dissoc opts :mode))
+      (load-state! id))))
+
+
+(set! window.onload init!)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;;;;; worker ;;;;;;
+
 (def userid (atom (.getItem js/localStorage "userid")))
 
 (defn emit-event!
@@ -128,32 +176,3 @@
                           (on-client-message (:data data)))
                          (.log js/console "on generic message" data))))
                    false)
-
-
-
-
-
-
-
-;;;;;;;;;; init
-(def run-tests! (delay-buffered run-tests! 500))
-(def refresh-canvas! (delay-buffered refresh-canvas! 200))
-
-(defn init! []
-  (let [editors {"html-editor" {:mode "ace/mode/html"
-                                "change" (fn [& args] (refresh-canvas!))}
-
-                 "js-editor"   {:mode "ace/mode/javascript"
-                                "change" (juxt emit-event! save-state!)
-                                "changeAnnotation" (fn [id] (run-if-stable! id (juxt refresh-canvas! run-tests!)))}
-
-                 "test-editor" {:mode "ace/mode/javascript"
-                                "changeAnnotation" (fn [id] (run-if-stable! id run-tests!))}}]
-
-    ;;load from local storage
-    (doseq [[id opts] editors]
-      (init-editor! id (:mode opts) (dissoc opts :mode))
-      (load-state! id))))
-
-
-(set! window.onload init!)
