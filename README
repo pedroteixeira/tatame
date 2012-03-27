@@ -3,8 +3,12 @@
 FIXME: write description
 
 ## Usage
+Install leiningen
+https://github.com/technomancy/leiningen
 
-FIXME: write
+  $ lein deps
+  $ lein run
+  $ lein cljsbuild auto
 
 ## License
 
