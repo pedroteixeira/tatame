@@ -1,7 +1,7 @@
 (ns tatame.worker)
 
-(def socket (new js/WebSocket "ws://localhost:8108/socket"))
-(def events (atom '[]))
+(def socket (new js/WebSocket (str "ws://" location.hostname ":8108/socket")))
+(def events (atom []))
 
 (defn send-messages!
   "Consume local queue and send to server" []

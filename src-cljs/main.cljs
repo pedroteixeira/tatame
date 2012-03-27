@@ -8,7 +8,8 @@
    [goog.dom :as gdom]
    [goog.object :as gobj]))
 
-(repl/connect "http://localhost:9000/repl")
+(if (= location.hostname "localhost")
+    (repl/connect "http://localhost:9000/repl"))
 
 (def jasmine-template (macros/get-template "static/jasmine-template.html"))
 (def editors (atom {}))

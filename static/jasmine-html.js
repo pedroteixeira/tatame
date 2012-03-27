@@ -69,22 +69,22 @@ jasmine.TrivialReporter.prototype.reportRunnerStarting = function(runner) {
 
   this.startedAt = new Date();
 
-  var self = this;
-  showPassed.onclick = function(evt) {
-    if (showPassed.checked) {
-      self.outerDiv.className += ' show-passed';
-    } else {
-      self.outerDiv.className = self.outerDiv.className.replace(/ show-passed/, '');
-    }
-  };
+  // var self = this;
+  // showPassed.onclick = function(evt) {
+  //   if (showPassed.checked) {
+  //     self.outerDiv.className += ' show-passed';
+  //   } else {
+  //     self.outerDiv.className = self.outerDiv.className.replace(/ show-passed/, '');
+  //   }
+  // };
 
-  showSkipped.onclick = function(evt) {
-    if (showSkipped.checked) {
-      self.outerDiv.className += ' show-skipped';
-    } else {
-      self.outerDiv.className = self.outerDiv.className.replace(/ show-skipped/, '');
-    }
-  };
+  // showSkipped.onclick = function(evt) {
+  //   if (showSkipped.checked) {
+  //     self.outerDiv.className += ' show-skipped';
+  //   } else {
+  //     self.outerDiv.className = self.outerDiv.className.replace(/ show-skipped/, '');
+  //   }
+  // };
 };
 
 jasmine.TrivialReporter.prototype.reportRunnerResults = function(runner) {
