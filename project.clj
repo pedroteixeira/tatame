@@ -2,10 +2,9 @@
   :description "tatame dojo toolkit"
   :dependencies [[org.clojure/clojure "1.3.0"]
                  [aleph "0.2.1-SNAPSHOT"]
-                 [compojure "1.0.1"]]
+                 [compojure "1.0.1"]
+                 [clj-esearch "0.5.0"]]
 
-  ; [hiccup "0.3.8"]
-  ; :dev-dependencies [[lein-ring "0.5.4"]]
 
   :main "tatame.core"
 

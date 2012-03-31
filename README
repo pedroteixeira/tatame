@@ -3,6 +3,9 @@
 FIXME: write description
 
 ## Usage
+Install elastic search
+http://www.elasticsearch.org/download/
+
 Install leiningen
 https://github.com/technomancy/leiningen
 
