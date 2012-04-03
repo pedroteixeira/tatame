@@ -5,12 +5,12 @@
         [noir.core :only [custom-handler]]
         [noir.server :only [gen-handler load-views-ns add-middleware]]
         [compojure.core :only [defroutes GET]]
-
         [noir.fetch.remotes :only [defremote wrap-remotes]]
 
         [tatame.server.ws :only [websocket-handler]])
 
   (:require [aleph.http :as aleph]
+            [tatame.model.commands :as model]
             [tatame.server.views :as views]))
 
 
@@ -20,8 +20,10 @@
 (def app (gen-handler))
 
 
-;; (defremote adder [& nums]
-;;   (apply + nums))
+
+
+(defremote adder [& nums]
+  (apply + nums))
 
 (add-middleware wrap-remotes)
 

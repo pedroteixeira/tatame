@@ -22,16 +22,23 @@
   (repl/connect "http://localhost:9000/repl"))
 
 
-;; (letrem [a (adder 3 4)]
-;;         (.log js/console a))
+
 
 
 
 (defn on-navigate
   "disparar ação com base em token..." [e]
-  (.log js/console "on navigate" e)
-  ;; (transition model/app :navigate (.-token e))
-  )
+
+
+  (let [token (.-token e)]
+    (.log js/console "on navigate" token)
+
+    (cond
+     (= token "")
+     true
+
+     (= token "new-dojo")
+     (views/on-start-dojo))))
 
 
 (defn init! []

@@ -1,5 +1,6 @@
 (ns tatame.model.commands
-  (:use [tatame.model.state :only [rename-client!]]))
+  (:use [tatame.model.state :only [rename-client! dojos]]
+        [noir.fetch.remotes :only [defremote wrap-remotes]]))
 
 ;;; commands
 (defmulti do-command "handles a command based on command name"
@@ -36,3 +37,16 @@
   [{username :username :as cmd}]
   ;;; get info from github
   )
+
+
+
+(defremote start-dojo []
+  (dosync
+   (alter dojos (fn [dojos] (conj dojos {:id (inc (count dojos))
+                                         :date (System/currentTimeMillis)})))
+
+   (last @dojos)))
+
+(defremote start-session [dojo-id]
+  (dosync sessions conj
+          {:dojo-id dojo-id :date (System/currentTimeMillis)}))

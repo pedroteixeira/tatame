@@ -15,7 +15,9 @@
 (defstate app :loading
   (in []
       (log "loading")
-      (views/render views/loading))
+      (views/render views/loading)
+
+      )
   (out [] (log "loaded")))
 
 (deftrans app :connect []
