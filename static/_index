@@ -1,0 +1,114 @@
+<!doctype html>
+<!--[if lt IE 7 ]> <html lang="en" class="no-js ie6"> <![endif]-->
+<!--[if IE 7 ]>    <html lang="en" class="no-js ie7"> <![endif]-->
+<!--[if IE 8 ]>    <html lang="en" class="no-js ie8"> <![endif]-->
+<!--[if IE 9 ]>    <html lang="en" class="no-js ie9"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--> <html lang="en" class="no-js">   <!--<![endif]-->
+
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+     <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+        <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- 1140px Grid styles for IE -->
+	<!--[if lte IE 9]><link rel="stylesheet" href="css/ie.css" type="text/css" media="screen" /><![endif]-->
+
+	<!-- The 1140px Grid - http://cssgrid.net/ -->
+	<link rel="stylesheet" href="/css/1140.css" type="text/css" media="screen" />
+	
+	<!-- Your styles -->
+	<link rel="stylesheet" href="/css/styles.css" type="text/css"
+	      media="screen" />
+
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+    
+  </head>
+ 
+  <body>
+    
+    <div class="container">
+      <div class="row">
+        <div id="workspace">
+        </div>
+        <br/>
+      </div>
+      
+      
+<!--       <div class="row"> -->
+<!--         <div class="sixcol"> -->
+<!--           <div id="js-editor" style="position:relative; height: 1400px; -->
+<!--                                   width: 100%">var init = function() { -->
+<!--     var canvas = document.createElement("canvas");         -->
+<!--     canvas.width = 500; -->
+<!--     canvas.height = 300; -->
+<!--     document.body.appendChild(canvas); -->
+    
+<!--     var context = canvas.getContext("2d");         -->
+<!--     context.fillRect(0, 0, 500, 300); -->
+<!-- }; -->
+<!-- </div>           -->
+          
+<!--         </div> -->
+
+<!--         <div class="sixcol last"> -->
+
+<!--           <div id="canvas"> -->
+<!--             <iframe id="canvas-frame" src="" style="width: 100%; height: -->
+<!--                                                     350px"></iframe> -->
+<!--           </div> -->
+                    
+<!--           <div id="html-editor" style="position:relative; height: -->
+<!--                                        200px; width: 100%">&lt;html&gt; -->
+<!--   &lt;head&gt; -->
+<!-- &#x00a0;&#x00a0;&#x00a0;&#x00a0;&lt;script type=&quot;text/javascript&quot;&gt;{{code}}&lt;/script&gt; -->
+<!-- &#x00a0;&#x00a0;&#x00a0;&#x00a0;&lt;script type=&quot;text/javascript&quot;&gt; -->
+<!-- &#x00a0;&#x00a0;&#x00a0;&#x00a0;window.onload = init; -->
+<!-- &#x00a0;&#x00a0;&#x00a0;&#x00a0;&lt;/script&gt; -->
+<!--   &lt;/head&gt; -->
+<!-- &#x00a0;&#x00a0;&lt;body&gt; -->
+<!-- &#x00a0;&#x00a0;&#x00a0;&lt;/body&gt; -->
+<!-- &lt;/html&gt;</div> -->
+          
+
+<!--           <br/><br/> -->
+<!--           <div id="jasmine" style="height:80px;"></div> -->
+<!--           <br/><br/> -->
+
+<!--           <div id="test-editor" style="position:relative; height: -->
+<!--                                        700px; width: 100%">describe('panda',function(){ -->
+<!--   it('is happy',function(){ -->
+<!--     expect(panda).toBe('happy'); -->
+<!--   }); -->
+<!-- });</div> -->
+
+          
+<!--         </div> -->
+<!--       </div> -->
+<!--     </div> -->
+
+
+    
+
+<!--     <script src="javascripts/ace/src/ace.js" type="text/javascript" -->
+<!--             charset="utf-8"></script> -->
+<!--     <script src="javascripts/ace/src/mode-javascript.js" -->
+<!--             type="text/javascript" charset="utf-8"></script> -->
+<!--     <script src="javascripts/ace/src/mode-html.js" -->
+<!--             type="text/javascript" charset="utf-8"></script> -->
+<!--     <script> -->
+<!--       require.aceBaseUrl = "/javascripts/ace/src/"; -->
+<!--     </script> -->
+
+
+    <script type="text/javascript" src="javascripts/main.js"></script>
+  </body>
+
+  </body>
+</html>
+
+
+
